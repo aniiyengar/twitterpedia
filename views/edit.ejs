@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Edit <%= title %></title>
+	</head>
+	<body>
+		<h1>Editing <%= title %></h1>
+		<form id="editForm" action="/sendedit/<%=title%>" method="POST">
+			<textarea id="edit" name="data"> <%= text %>
+			</textarea> <br/>
+
+			<input type="submit" value="Submit"/>
+		</form>
+	</body>
+</html>
