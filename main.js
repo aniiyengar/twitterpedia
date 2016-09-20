@@ -24,7 +24,7 @@ var editors = {};
 var twitter = new twitterAPI({
 	consumerKey: process.env.consumerKey,
 	consumerSecret: process.env.consumerSecret,
-	callback: 'http://localhost/wiki'
+	callback: 'http://twitterpedia.aniruddh.co/wiki'
 });
 
 app.get('/', function(req, res) { res.sendFile(__dirname + '/views/index.html'); });
@@ -153,7 +153,7 @@ app.post('/sendedit/:title', function(req, res) {
 		}, req.session.accessToken, req.session.accessSecret, function(err, data, response) {
 			if (err) return res.send(err);
 			else {
-				res.redirect('http://localhost/wiki/' + req.params.title);
+				res.redirect('http://twitterpedia.aniruddh.co/wiki/' + req.params.title);
 			}
 		});
 	});
