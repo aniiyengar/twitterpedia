@@ -4,12 +4,30 @@
 	<head>
 		<title>Wiki Page</title>
 		<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+		<link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700,700i,900" rel="stylesheet">
+		<link rel="stylesheet" href="../css/wikipage.css" />
 	</head>
 	<body>
+		<div id="content">
 
-		<h1><%= title %></h1>
-		<p><a href="/edit/<%= title %>">Edit</a>
-		<p><%= text %></p>
+			<p>Go to topic: <input id="goto" type="text" /><p><br/><br/>
+
+			<h1 class="title"><%= title %></h1>
+			<% if (title != 'Welcome to Twitterpedia!') { %>
+				<p class="edit"><a href="/edit/<%= title %>">[Edit]</a></p>
+			<% } %>
+			<p class="text"><%= text %></p>
+
+		</div>
+
+		<script>
+		$("#goto").keydown(function(event) {
+			if (event.keyCode == 13) {
+				location.href = 'http://localhost/wiki/' + $(this).val();
+			}
+		});
+		</script>
 
 	</body>
 </html>

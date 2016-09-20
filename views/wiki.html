@@ -8,7 +8,7 @@
 	<body>
 		<script>
 			$.get("http://localhost/access_token" + location.search, function(data) {
-				console.log(data);
+				location.href = 'http://localhost/wiki/home';
 			});
 		</script>
 	</body>

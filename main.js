@@ -31,6 +31,10 @@ var twitter = new twitterAPI({
 app.get('/', function(req, res) { res.sendFile(__dirname + '/views/index.html'); });
 app.get('/wiki', function(req, res) { res.sendFile(__dirname + '/views/wiki.html'); });
 
+app.get('/css/:file', function(req, res) {
+	return res.sendFile(__dirname + '/css/' + req.params.file);
+});
+
 app.get('/request_token', function(req, res) {
 	twitter.getRequestToken(function(err, reqToken, reqSecret) {
 		if (err) return res.send(err);
@@ -81,7 +85,6 @@ var transformStringFromDiff = function(d, str) {
 
 var getTextWithTitle = function(session, title, callback) {
 	var text = "";
-	console.log(editors);
 	if (editors[title] == undefined) {
 		callback("");
 	}
@@ -90,8 +93,11 @@ var getTextWithTitle = function(session, title, callback) {
 		twitter.search({
 			q: q
 		}, session.accessToken, session.accessSecret, function(err, data, response) {
+			console.log(data);
 			var fin = '';
-			console.log(data.statuses);
+			data.statuses.sort(function(a, b) {
+				return b.id - a.id;
+			});
 			for (var i = data.statuses.length-1; i >= 0; i--) {
 				var d = data.statuses[i].text.split("!@")[0];
 				if (d === title) fin = transformStringFromDiff(data.statuses[i].text.split('!@')[1], fin);
@@ -99,12 +105,19 @@ var getTextWithTitle = function(session, title, callback) {
 			callback(fin);
 		});
 	}
-	console.log(q);
 	
 };
 
 app.get('/wiki/:title', function(req, res) {
-	getTextWithTitle(req.session, req.params.title, function(text) {
+	if (!req.session.user) return res.redirect('/');
+	if (req.params.title === 'home') {
+		res.render(__dirname + '/views/page.ejs', {
+			title: 'Welcome to Twitterpedia!',
+			text: 'Twitterpedia is a user-editable wiki that is hosted by Twitter.\
+			 All the pages on this wiki (not including this) are encoded in actual Tweets.'
+		});
+	}
+	else getTextWithTitle(req.session, req.params.title, function(text) {
 		res.render(__dirname + '/views/page.ejs', {
 			title: req.params.title,
 			text: text
@@ -113,9 +126,9 @@ app.get('/wiki/:title', function(req, res) {
 });
 
 app.post('/sendedit/:title', function(req, res) {
+	if (!req.session.user) return res.redirect('/');
 	getTextWithTitle(req.session, req.params.title, function(text) {
 		var difference = diff.diffChars(text, req.body.data);
-		console.log(difference);
 		var d = req.params.title + "!@";
 		for (var i = 0; i < difference.length; i++) {
 			var currDiff = difference[i];
@@ -150,6 +163,7 @@ app.post('/sendedit/:title', function(req, res) {
 
 
 app.get('/edit/:title', function(req, res) {
+	if (!req.session.user) return res.redirect('/');
 	getTextWithTitle(req.session, req.params.title, function(text) {
 		res.render(__dirname + '/views/edit.ejs', {
 			title: req.params.title,
@@ -158,5 +172,5 @@ app.get('/edit/:title', function(req, res) {
 	});
 });
 
-app.listen(80);
+app.listen(8000);
 
