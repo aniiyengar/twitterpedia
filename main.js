@@ -171,6 +171,5 @@ app.get('/edit/:title', function(req, res) {
 	});
 });
 
-console.log(process.env.PORT);
 app.listen(process.env.PORT | 80);
 
