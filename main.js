@@ -27,8 +27,10 @@ var saveEditors = function() {
 };
 
 var getEditors = function() {
-	editors = fs.readFileSync(__dirname + 'editors.json');
+	if (fs.lstatSync('/the/path').isFile()) editors = fs.readFileSync(__dirname + 'editors.json');
 };
+
+getEditors();
 
 var twitter = new twitterAPI({
 	consumerKey: process.env.consumerKey,
