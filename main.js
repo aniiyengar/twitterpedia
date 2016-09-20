@@ -20,7 +20,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
-var wiki = {};
+var editors = {};
 
 var twitter = new twitterAPI({
 	consumerKey: config.consumerKey,
@@ -61,7 +61,7 @@ app.get('/access_token', function(req, res) {
 
 var transformStringFromDiff = function(d, str) {
 	var newStr = '';
-	var segs = d.split('||');
+	var segs = d.split('\\');
 	var ct = 0;
 	for (var i = 0; i < segs.length; i++) {
 		var t = segs[i].split('|');
@@ -81,15 +81,26 @@ var transformStringFromDiff = function(d, str) {
 
 var getTextWithTitle = function(session, title, callback) {
 	var text = "";
-	twitter.search({
-		q: 'from:' + session.user.screen_name
-	}, session.accessToken, session.accessSecret, function(err, data, response) {
-		var fin = '';
-		for (var i = data.statuses.length-1; i >= 0; i--) {
-			fin = transformStringFromDiff(data.statuses[i].text, fin);
-		}
-		callback(fin);
-	});
+	console.log(editors);
+	if (editors[title] == undefined) {
+		callback("");
+	}
+	else {
+		var q = 'from:' + editors[title].join(' OR from:');
+		twitter.search({
+			q: q
+		}, session.accessToken, session.accessSecret, function(err, data, response) {
+			var fin = '';
+			console.log(data.statuses);
+			for (var i = data.statuses.length-1; i >= 0; i--) {
+				var d = data.statuses[i].text.split("!@")[0];
+				if (d === title) fin = transformStringFromDiff(data.statuses[i].text.split('!@')[1], fin);
+			}
+			callback(fin);
+		});
+	}
+	console.log(q);
+	
 };
 
 app.get('/wiki/:title', function(req, res) {
@@ -105,20 +116,26 @@ app.post('/sendedit/:title', function(req, res) {
 	getTextWithTitle(req.session, req.params.title, function(text) {
 		var difference = diff.diffChars(text, req.body.data);
 		console.log(difference);
-		var d = '';
+		var d = req.params.title + "!@";
 		for (var i = 0; i < difference.length; i++) {
 			var currDiff = difference[i];
 			if (currDiff.added == undefined && currDiff.removed == undefined) {
-				d += 'm|' + currDiff.count + '||';
+				d += 'm|' + currDiff.count + '\\';
 			}
 			else if (currDiff.added == true) {
-				d += 'a|' + currDiff.value + '||';
+				d += 'a|' + currDiff.value + '\\';
 			}
 			else if (currDiff.removed == true) {
-				d += 's|' + currDiff.count + '||';
+				d += 's|' + currDiff.count + '\\';
 			}
 		}
-		d = d.substring(0, d.length-2);
+		d = d.substring(0, d.length-1);
+		if (editors[req.params.title] == undefined) {
+			editors[req.params.title] = [req.session.user.screen_name];
+		}
+		else {
+			editors[req.params.title].push(req.session.user.screen_name);
+		}
 		twitter.statuses('update', {
 			status: d
 		}, req.session.accessToken, req.session.accessSecret, function(err, data, response) {
