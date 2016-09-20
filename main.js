@@ -113,7 +113,8 @@ app.get('/wiki/:title', function(req, res) {
 		res.render(__dirname + '/views/page.ejs', {
 			title: 'Welcome to Twitterpedia!',
 			text: 'Twitterpedia is a user-editable wiki that is hosted by Twitter.\
-			 All the pages on this wiki (not including this) are encoded in actual Tweets.'
+			 All the pages on this wiki (not including this) are encoded in actual Tweets. \
+			 Note: Edits take 1-2 minutes to appear because of the Twitter API.'
 		});
 	}
 	else getTextWithTitle(req.session, req.params.title, function(text) {
