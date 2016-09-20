@@ -7,7 +7,6 @@ var smaz = require('smaz');
 var ejs = require('ejs');
 var diff = require('diff');
 var bodyParser = require('body-parser');
-var config = require('./config.js');
 
 var app = express();
 app.use(cookieParser());
@@ -23,8 +22,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 var editors = {};
 
 var twitter = new twitterAPI({
-	consumerKey: config.consumerKey,
-	consumerSecret: config.consumerSecret,
+	consumerKey: process.env.consumerKey,
+	consumerSecret: process.env.consumerSecret,
 	callback: 'http://localhost/wiki'
 });
 
