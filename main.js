@@ -7,6 +7,7 @@ var smaz = require('smaz');
 var ejs = require('ejs');
 var diff = require('diff');
 var bodyParser = require('body-parser');
+var fs = require('fs');
 
 var app = express();
 app.use(cookieParser());
@@ -20,6 +21,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 var editors = {};
+
+var saveEditors = function() {
+	fs.writeFileSync(__dirname + 'editors.json', JSON.stringify(editors));
+};
+
+var getEditors = function() {
+	editors = fs.readFileSync(__dirname + 'editors.json');
+};
 
 var twitter = new twitterAPI({
 	consumerKey: process.env.consumerKey,
@@ -84,6 +93,7 @@ var transformStringFromDiff = function(d, str) {
 
 var getTextWithTitle = function(session, title, callback) {
 	var text = "";
+	getEditors();
 	if (editors[title] == undefined) {
 		callback("");
 	}
@@ -149,6 +159,7 @@ app.post('/sendedit/:title', function(req, res) {
 		else {
 			editors[req.params.title].push(req.session.user.screen_name);
 		}
+		saveEditors();
 		twitter.statuses('update', {
 			status: d
 		}, req.session.accessToken, req.session.accessSecret, function(err, data, response) {
