@@ -171,5 +171,5 @@ app.get('/edit/:title', function(req, res) {
 	});
 });
 
-app.listen(process.env.PORT | 80);
+app.listen(process.env.PORT || 80);
 
