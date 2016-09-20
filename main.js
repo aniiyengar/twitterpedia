@@ -27,7 +27,7 @@ var saveEditors = function() {
 };
 
 var getEditors = function() {
-	if (fs.lstatSync('/the/path').isFile()) editors = fs.readFileSync(__dirname + 'editors.json');
+	if (fs.existsSync(__dirname + 'editors.json')) editors = fs.readFileSync(__dirname + 'editors.json');
 };
 
 getEditors();
